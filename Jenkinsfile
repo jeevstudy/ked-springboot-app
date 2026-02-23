@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    environment {
+        EXTERNAL_REGISTRY = "192.168.1.50:5005"
+        INTERNAL_REGISTRY = "k3d-jeevregistry.localhost:5005"
+        IMAGE_NAME = "spring-boot-app"
+        TAG = "v${BUILD_NUMBER}"
+        HOST_VM_IP = "192.168.1.50"
+    }
+    stages {
+        stage('Maven Build') {
+            steps {
+                sh "docker run --rm -v \$(pwd):/app -v /root/.m2:/root/.m2 -w /app maven:3.8-openjdk-17-slim mvn clean package -DskipTests"
+            }
+        }
+        stage('Build & Push Image') {
+            steps {
+                sh "docker build -t ${EXTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG} ."
+                sh "docker push ${EXTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}"
+            }
+        }
+        stage('Deploy to K3d') {
+            steps {
+                sh """
+                cat <<EOF | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      hostNetwork: true  # Pod shares the VM's network
+      containers:
+      - name: spring-boot
+        image: ${INTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}
+        imagePullPolicy: Always
+        env:
+        - name: MONGO_USER
+          valueFrom: { secretKeyRef: { name: mongo-creds, key: username } }
+        - name: MONGO_PASS
+          valueFrom: { secretKeyRef: { name: mongo-creds, key: password } }
+        - name: MONGODB_URI
+          value: "mongodb://\\\$(MONGO_USER):\\\$(MONGO_PASS)@${HOST_VM_IP}:27017/learningDB?authSource=learningDB"
+        ports:
+        - containerPort: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service
+spec:
+  selector:
+    app: spring-app
+  ports:
+    - port: 8081
+      targetPort: 8081
+EOF
+                """
+            }
+        }
+    }
+}
