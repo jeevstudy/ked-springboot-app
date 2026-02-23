@@ -10,7 +10,8 @@ pipeline {
     stages {
         stage('Maven Build') {
             steps {
-                sh "docker run --rm -v \$(pwd):/app -v /root/.m2:/root/.m2 -w /app maven:3.8-openjdk-17-slim mvn clean package -DskipTests"
+                // \$(id -u):\$(id -g) forces docker to use the Jenkins user's permissions
+                sh "docker run --rm --user \$(id -u):\$(id -g) -v \$(pwd):/app -v /root/.m2:/root/.m2 -w /app maven:3.9-eclipse-temurin-17 clean package -DskipTests"
             }
         }
         stage('Build & Push Image') {
