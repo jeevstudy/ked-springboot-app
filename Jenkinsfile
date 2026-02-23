@@ -65,13 +65,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: spring-service
+  name: spring-boot-svc
 spec:
+  type: NodePort
   selector:
     app: spring-app
   ports:
     - port: 8081
       targetPort: 8081
+      nodePort: 30081
 EOF
                 """
             }
