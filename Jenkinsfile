@@ -46,7 +46,8 @@ spec:
       labels:
         app: spring-app
     spec:
-      hostNetwork: true  # Pod shares the VM's network
+      hostNetwork: true               # <--- MUST be here (under spec)
+      dnsPolicy: ClusterFirstWithHostNet # <--- Required when using hostNetwork
       containers:
       - name: spring-boot
         image: ${INTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}

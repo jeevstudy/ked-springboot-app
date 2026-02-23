@@ -14,6 +14,6 @@ public class KedSpringbootAppApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(KedSpringbootAppApplication.class, args);
 
-    System.out.println("DEBUG: Connection URI is ->" + context.getEnvironment().getProperty("spring.data.mongodb.uri"));
+//    System.out.println("DEBUG: Connection URI is ->" + context.getEnvironment().getProperty("spring.data.mongodb.uri"));
 }
 }
