@@ -10,8 +10,16 @@ pipeline {
     stages {
         stage('Maven Build') {
             steps {
-                // \$(id -u):\$(id -g) forces docker to use the Jenkins user's permissions
-                sh "docker run --rm --user \$(id -u):\$(id -g) -v \$(pwd):/app -v /root/.m2:/root/.m2 -w /app maven:3.9-eclipse-temurin-17 clean package -DskipTests"
+                sh """
+                docker run --rm \
+                --user \$(id -u):\$(id -g) \
+                -v \$(pwd):/app \
+                -v /tmp/.m2:/var/maven/.m2 \
+                -e MAVEN_CONFIG=/var/maven/.m2 \
+                -w /app \
+                maven:3.9-eclipse-temurin-17 \
+                mvn clean package -DskipTests
+                """
             }
         }
         stage('Build & Push Image') {
