@@ -33,7 +33,7 @@ pipeline {
         stage('Deploy to K3d') {
             steps {
                 sh """
-                cat <<EOF | kubectl apply -f -
+                cat <<EOF | kubectl apply --server=https://192.168.1.60:6443 --insecure-skip-tls-verify=true -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -48,8 +48,8 @@ spec:
       labels:
         app: spring-app
     spec:
-      hostNetwork: true               # <--- MUST be here (under spec)
-      dnsPolicy: ClusterFirstWithHostNet # <--- Required when using hostNetwork
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: spring-boot
         image: ${INTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}
@@ -60,7 +60,7 @@ spec:
         - name: MONGO_PASS
           valueFrom: { secretKeyRef: { name: mongo-creds, key: password } }
         - name: MONGODB_URI
-          value: "mongodb://\$(MONGO_USER):\$(MONGO_PASS)@${HOST_VM_IP}:27017/learningDB?authSource=learningDB"
+          value: "mongodb://\\\$(MONGO_USER):\\\$(MONGO_PASS)@${HOST_VM_IP}:27017/learningDB?authSource=learningDB"
         ports:
         - containerPort: 8081
 ---
