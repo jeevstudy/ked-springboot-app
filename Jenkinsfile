@@ -1,11 +1,13 @@
 pipeline {
     agent any
     environment {
-        EXTERNAL_REGISTRY = "192.168.1.50:5005"
+        EXTERNAL_REGISTRY = "192.168.1.60:5005"
+        HOST_VM_IP = "192.168.1.60"
+
         INTERNAL_REGISTRY = "k3d-jeevregistry.localhost:5005"
         IMAGE_NAME = "spring-boot-app"
         TAG = "v${BUILD_NUMBER}"
-        HOST_VM_IP = "192.168.1.50"
+
     }
     stages {
         stage('Maven Build') {

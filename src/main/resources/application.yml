@@ -3,7 +3,7 @@ spring:
     name: kedSpringbootApp
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://user:password@192.168.1.50:27017/learningDB?authSource=learningDB}
+      uri: ${MONGODB_URI:mongodb://user:password@192.168.1.60:27017/learningDB?authSource=learningDB}
       database: learningDB
       field-naming-strategy: org.springframework.data.mapping.model.SnakeCaseFieldNamingStrategy
 
