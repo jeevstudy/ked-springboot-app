@@ -60,7 +60,7 @@ spec:
         - name: MONGO_PASS
           valueFrom: { secretKeyRef: { name: mongo-creds, key: password } }
         - name: MONGODB_URI
-          value: "mongodb://\\\$(MONGO_USER):\\\$(MONGO_PASS)@${HOST_VM_IP}:27017/learningDB?authSource=learningDB"
+          value: "mongodb://\$(MONGO_USER):\$(MONGO_PASS)@${HOST_VM_IP}:27017/learningDB?authSource=learningDB"
         ports:
         - containerPort: 8081
 ---
