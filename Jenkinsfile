@@ -7,7 +7,8 @@ pipeline {
         INTERNAL_REGISTRY = "k3d-jeevregistry.localhost:5005"
         IMAGE_NAME = "spring-boot-app"
         TAG = "v${BUILD_NUMBER}"
-
+        // This pulls the secret from Jenkins and puts it in a temporary variable
+        K3S_TOKEN = credentials('k3s-token')
     }
     stages {
         stage('Maven Build') {
@@ -33,7 +34,7 @@ pipeline {
         stage('Deploy to K3d') {
             steps {
                 sh """
-                cat <<EOF | kubectl apply --server=https://192.168.1.60:6443 --insecure-skip-tls-verify=true -f -
+                cat <<EOF | kubectl apply --server=https://192.168.1.60:35251 --token="${K3S_TOKEN}" --insecure-skip-tls-verify=true -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
