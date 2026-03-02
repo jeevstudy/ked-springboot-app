@@ -4,7 +4,7 @@ pipeline {
         EXTERNAL_REGISTRY = "192.168.1.60:5005"
         HOST_VM_IP = "192.168.1.60"
 
-        INTERNAL_REGISTRY = "k3d-jeevregistry.localhost:5005"
+        INTERNAL_REGISTRY = "k3d-jeevregistry:5005"
         IMAGE_NAME = "spring-boot-app"
         TAG = "v${BUILD_NUMBER}"
         // This pulls the secret from Jenkins and puts it in a temporary variable
@@ -49,7 +49,7 @@ spec:
       containers:
       - name: spring-boot
         image: ${INTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: MONGO_USER
           valueFrom: { secretKeyRef: { name: mongo-creds, key: username } }
@@ -65,6 +65,7 @@ kind: Service
 metadata:
   name: spring-boot-svc
 spec:
+  type: LoadBalancer
   selector:
     app: spring-app
   ports:
