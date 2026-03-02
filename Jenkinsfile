@@ -25,16 +25,13 @@ pipeline {
                 """
             }
         }
-        stage('Build & Push Image') {
-            steps {
-                sh "docker build -t ${EXTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG} ."
-                sh "docker push ${EXTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}"
-            }
-        }
-        stage('Deploy to K3d') {
+stage('Deploy to K3d') {
             steps {
                 sh """
-                cat <<EOF | kubectl apply --server=https://192.168.1.60:35251 --token="${K3S_TOKEN}" --insecure-skip-tls-verify=true -f -
+                cat <<EOF | kubectl apply \
+                  --server=https://192.168.1.60:6443 \
+                  --token="${K3S_TOKEN}" \
+                  --insecure-skip-tls-verify=true -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,8 +46,6 @@ spec:
       labels:
         app: spring-app
     spec:
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: spring-boot
         image: ${INTERNAL_REGISTRY}/${IMAGE_NAME}:${TAG}
@@ -70,13 +65,11 @@ kind: Service
 metadata:
   name: spring-boot-svc
 spec:
-  type: NodePort
   selector:
     app: spring-app
   ports:
     - port: 8081
       targetPort: 8081
-      nodePort: 30081
 EOF
                 """
             }
